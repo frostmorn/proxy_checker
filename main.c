@@ -9,7 +9,7 @@
 
 
 
-size_t      workers_max             = MAX_WORKERS_DEFAULT;
+size_t      workers_count           = MAX_WORKERS_DEFAULT;
 char*       proxy_types             = PROXY_TYPES_DEFAULT;
 char*       input_filename_proxy    = INPUT_FILENAME_DEFAULT;
 char*       output_filename_proxy   = OUTPUT_FILENAME_DEFAULT;
@@ -77,7 +77,7 @@ if(strstr(argv[1],"checker"))
         switch (opt)
         {
             case 'w':
-                workers_max = (size_t)atoi(optarg);
+                workers_count = (size_t)atoi(optarg);
                 break;
             case 'i':
                 input_filename_proxy = optarg;
@@ -118,29 +118,29 @@ if(strstr(argv[1],"checker"))
 
 
     sblist*         proxy_list      = load_proxy(input_filename_proxy);
-    proxy_thread_t* threads         = malloc(sizeof(proxy_thread_t)*workers_max);
+    proxy_thread_t* threads         = malloc(sizeof(proxy_thread_t)*workers_count);
 
 
-    for (proxy_thread_t *it = threads; it != threads + workers_max; it++)
+    for (proxy_thread_t *it = threads; it != threads + workers_count; it++)
         it->done = -1;
 
 
     if(check_socks4)
     {
         log_info("Start checking socks4");
-        checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Socks4);
+        checking_from_list(proxy_list,output_filename_proxy,threads,workers_count,Socks4);
     }
 
     if(check_socks5)
     {
         log_info("Start checking socks5");
-        checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Socks5);
+        checking_from_list(proxy_list,output_filename_proxy,threads,workers_count,Socks5);
     }
 
     if(check_http)
     {
         log_info("Start checking http");
-        checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Http);
+        checking_from_list(proxy_list,output_filename_proxy,threads,workers_count,Http);
     }
 
 }
@@ -167,7 +167,7 @@ else if (strstr(argv[1],"scanner"))
                 range_end   = atoi(strstr(optarg,"-")+1);
                 break;
             case 'w':
-                workers_max = (size_t)atoi(optarg);
+                workers_count = (size_t)atoi(optarg);
                 break;
             case 'o':
                 output_filename_proxy = optarg;
@@ -205,29 +205,29 @@ else if (strstr(argv[1],"scanner"))
     bool check_http     = parse_proxy_type(Http,  proxy_types);
 
 
-    proxy_thread_t* threads = malloc(sizeof(proxy_thread_t)*workers_max);
+    proxy_thread_t* threads = malloc(sizeof(proxy_thread_t)*workers_count);
 
 
-    for (proxy_thread_t *it = threads; it != threads + workers_max; it++)
+    for (proxy_thread_t *it = threads; it != threads + workers_count; it++)
         it->done = -1;
 
 
     log_info("staring checking range %u-%u",range_start,range_end);
 
 
-    for(uint32_t proxy_addr = range_start; proxy_addr <= range_end; proxy_addr += workers_max)
+    for(uint32_t proxy_addr = range_start; proxy_addr <= range_end; proxy_addr += workers_count)
     {
         if(check_socks4)
             checking_from_range(proxy_addr,ports_socks4->items,ports_socks4->count,
-                                output_filename_proxy,threads,workers_max,Socks4);
+                                output_filename_proxy,threads,workers_count,Socks4);
 
         if(check_socks5)
             checking_from_range(proxy_addr,ports_socks5->items,ports_socks5->count,
-                                output_filename_proxy,threads,workers_max,Socks5);
+                                output_filename_proxy,threads,workers_count,Socks5);
 
         if(check_http)
             checking_from_range(proxy_addr,ports_http->items,ports_http->count,
-                                output_filename_proxy,threads,workers_max,Http);
+                                output_filename_proxy,threads,workers_count,Http);
 
 
         log_info("status: %u/%u | %lf%%", proxy_addr,range_end, ((double)proxy_addr/range_end)*100.0);
