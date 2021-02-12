@@ -234,7 +234,10 @@ sblist *load_proxy(const char *filename)
         char *spliter;
 
 
-        proxy_file = fopen(filename,"r"); if(proxy_file <= 0) { log_error("proxy file (%s) not found!",filename); };
+        proxy_file = fopen(filename,"r"); if(proxy_file <= 0) { 
+            log_error("proxy file (%s) not found!",filename); 
+            exit(-1);
+        };
         proxy_list = sblist_create(sizeof (proxy_t), SBLIST_BLOCK_SIZE);
 
         for(;;)
